@@ -16,6 +16,7 @@ import java.util.Optional;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.Tag;
 import net.minecraft.util.registry.Registry;
 
 public abstract class StoragePeripheral implements IPeripheral
@@ -95,8 +96,29 @@ public abstract class StoragePeripheral implements IPeripheral
         table.put("locked", storage.isLocked());
         table.put("full", storage.isFull());
         table.put("empty", storage.isEmpty());
-        table.put("itemName", storage.getDisplayedStack().getName().getString());
-        table.put("itemID", Registry.ITEM.getId(storage.getDisplayedStack().getItem()).toString());
+        table.put("item", serializeItemStack(storage.getDisplayedStack()));
+        return table;
+    }
+    
+    private Map<String, Object> serializeItemStack(@NotNull ItemStack stack)
+    {
+        HashMap<String, Object> table = new HashMap<>();
+        table.put("name", stack.getItem().getName().getString());
+        table.put("id", Registry.ITEM.getId(stack.getItem()).toString());
+        table.put("count", stack.getCount());
+        if(stack.isDamageable())
+        {
+            table.put("damage", stack.getDamage());
+            table.put("maxDamage", stack.getMaxDamage());
+        }
+        if(stack.hasCustomName())
+        {
+            table.put("customName", stack.getName().getString());
+        }
+        if(stack.hasTag())
+        {
+            table.put("nbt", stack.getTag().asString());
+        }
         return table;
     }
     
