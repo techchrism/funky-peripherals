@@ -22,10 +22,12 @@ dependencies {
 	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
 	// You may need to force-disable transitiveness on them.
 	modImplementation 'com.github.techchrism:cc-tweaked-fabric:v1.19.2'
+	modImplementation 'TechReborn:TechReborn-1.16:+'
 }
 
 repositories {
 	maven { url 'https://jitpack.io' }
+	maven { url 'http://maven.modmuss50.me' }
 }
 
 processResources {

@@ -67,18 +67,10 @@ public class TurtleStorageUpgrade extends AbstractTurtleUpgrade
         }
     
         @Override
-        protected boolean checkIfIsStorage(InteractDirection direction)
+        protected BlockEntity getBlockEntity(InteractDirection direction)
         {
             BlockPos pos = turtle.getPosition().offset(direction.toWorldDir(turtle));
-            BlockEntity entity = turtle.getWorld().getBlockEntity(pos);
-            if(entity == null)
-            {
-                return false;
-            }
-            else
-            {
-                return (entity instanceof Inventory);
-            }
+            return turtle.getWorld().getBlockEntity(pos);
         }
     }
 }

@@ -29,6 +29,6 @@
     "computercraft": ">=1.91.2"
   },
   "suggests": {
-    "flamingo": "*"
+    "techreborn": "*"
   }
 }
