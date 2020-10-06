@@ -1,16 +1,26 @@
 package me.techchrism.funkyperipherals.turtle;
 
 import dan200.computercraft.api.client.TransformedModel;
+import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.lua.LuaException;
+import dan200.computercraft.api.lua.LuaFunction;
+import dan200.computercraft.api.lua.LuaValues;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.*;
 import dan200.computercraft.shared.turtle.core.InteractDirection;
+import dan200.computercraft.shared.util.InventoryUtil;
 import me.techchrism.funkyperipherals.FunkyPeripherals;
 import me.techchrism.funkyperipherals.peripherals.StoragePeripheral;
 import org.jetbrains.annotations.NotNull;
+import org.squiddev.cobalt.Lua;
+
+import java.util.Map;
+import java.util.Optional;
 
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.inventory.Inventory;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 
@@ -71,6 +81,12 @@ public class TurtleStorageUpgrade extends AbstractTurtleUpgrade
         {
             BlockPos pos = turtle.getPosition().offset(direction.toWorldDir(turtle));
             return turtle.getWorld().getBlockEntity(pos);
+        }
+    
+        @Override
+        protected ITurtleAccess getTurtle()
+        {
+            return turtle;
         }
     }
 }
