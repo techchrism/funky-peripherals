@@ -4,13 +4,15 @@ import dan200.computercraft.api.ComputerCraftAPI;
 import me.techchrism.funkyperipherals.turtle.TurtleStorageUpgrade;
 import me.techchrism.funkyperipherals.turtle.TurtleTeleporterUpgrade;
 
-import net.minecraft.client.util.ModelIdentifier;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
 import net.fabricmc.loader.api.FabricLoader;
 
 public class FunkyPeripherals implements ModInitializer
@@ -26,7 +28,29 @@ public class FunkyPeripherals implements ModInitializer
         ComputerCraftAPI.registerTurtleUpgrade(new TurtleStorageUpgrade(new Identifier("funkyperipherals", "storage_upgrade")));
         if(teleportersExist)
         {
-            ComputerCraftAPI.registerTurtleUpgrade(new TurtleTeleporterUpgrade(new Identifier("funkyperipherals", "teleporter_upgrade")));
+            AtomicBoolean found = new AtomicBoolean(
+                    !Registry.ITEM.get(new Identifier("simpleteleporters", "teleporter"))
+                            .equals(Registry.ITEM.get((Identifier) null)));
+            if(!found.get())
+            {
+                RegistryEntryAddedCallback.event(Registry.ITEM).register((i, identifier, item) ->
+                {
+                    if(!found.get() && identifier.equals(new Identifier("simpleteleporters", "teleporter")))
+                    {
+                        found.set(true);
+                        addTeleporterIntegration();
+                    }
+                });
+            }
+            else
+            {
+                addTeleporterIntegration();
+            }
         }
+    }
+    
+    private void addTeleporterIntegration()
+    {
+        ComputerCraftAPI.registerTurtleUpgrade(new TurtleTeleporterUpgrade(new Identifier("funkyperipherals", "teleporter_upgrade")));
     }
 }

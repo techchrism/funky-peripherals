@@ -27,7 +27,7 @@ import net.fabricmc.api.Environment;
 public class TurtleTeleporterUpgrade extends AbstractTurtleUpgrade
 {
     @Environment(EnvType.CLIENT) private ModelIdentifier m_leftModel;
-    @Environment (EnvType.CLIENT) private ModelIdentifier m_rightModel;
+    @Environment(EnvType.CLIENT) private ModelIdentifier m_rightModel;
     
     public TurtleTeleporterUpgrade(Identifier id)
     {
