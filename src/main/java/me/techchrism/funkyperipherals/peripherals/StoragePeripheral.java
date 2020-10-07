@@ -6,14 +6,13 @@ import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.api.lua.LuaValues;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.ITurtleAccess;
-import dan200.computercraft.api.turtle.TurtleCommandResult;
 import dan200.computercraft.shared.turtle.core.InteractDirection;
+import me.techchrism.funkyperipherals.util.InventoryTransferResult;
+import me.techchrism.funkyperipherals.util.InventoryUtil;
 import org.jetbrains.annotations.NotNull;
 import techreborn.blockentity.storage.item.StorageUnitBaseBlockEntity;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.inventory.Inventory;
@@ -147,51 +146,35 @@ public abstract class StoragePeripheral implements IPeripheral
     @LuaFunction(mainThread = true)
     public final Object[] transferFrom(ILuaContext context, int from, Optional<Integer> to, Optional<Integer> limitOption, Optional<String> direction) throws LuaException
     {
-        Inventory inv = getInventory(direction, 2);
+        Inventory inv = getInventory(direction, 4);
         ITurtleAccess turtle = getTurtle();
         from--;
         int toSlot = to.orElse(turtle.getSelectedSlot() + 1) - 1;
-        if(from < 0 || from >= inv.size())
-        {
-            return generateTransferResult(0, "Invalid \"from\" slot");
-        }
-        if(toSlot < 0 || toSlot >= turtle.getInventory().size())
-        {
-            return generateTransferResult(0, "Invalid \"to\" slot");
-        }
-        ItemStack fromStack = inv.getStack(from);
-        ItemStack toStack = turtle.getInventory().getStack(toSlot);
-        if(!toStack.isEmpty() && !toStack.isItemEqual(fromStack))
-        {
-            return generateTransferResult(0, "Slot already occupied");
-        }
-        
-        int limit = limitOption.orElse(inv.getStack(from).getCount());
-        
-        // Either use the limit as the amount, the "from" stack size, or
-        // the max amount until the "to" stack is maxed out, whichever is smallest
-        int transferAmount = Math.min(Math.min(
-                limit,
-                inv.getStack(from).getMaxCount() - turtle.getInventory().getStack(toSlot).getCount()),
-                inv.getStack(from).getCount());
+        InventoryTransferResult result = InventoryUtil.transfer(inv, from, turtle.getInventory(), toSlot, limitOption);
+        return new Object[]{result.getAmount(), result.getMessage()};
+    }
     
-        if(transferAmount < 1)
+    @LuaFunction(mainThread = true)
+    public final Object[] transferTo(ILuaContext context, int to, Optional<Integer> from, Optional<Integer> limitOption, Optional<String> direction) throws LuaException
+    {
+        Inventory inv = getInventory(direction, 4);
+        ITurtleAccess turtle = getTurtle();
+        to--;
+        int fromSlot = from.orElse(turtle.getSelectedSlot() + 1) - 1;
+        InventoryTransferResult result = InventoryUtil.transfer(turtle.getInventory(), fromSlot, inv, to, limitOption);
+        return new Object[]{result.getAmount(), result.getMessage()};
+    }
+    
+    @LuaFunction(mainThread = true)
+    public final List<Map<String, Object>> getInventoryContents(ILuaContext context, Optional<String> direction) throws LuaException
+    {
+        Inventory inv = getInventory(direction, 1);
+        List<Map<String, Object>> contents = new ArrayList<>(inv.size());
+        for(int i = 0; i < inv.size(); i++)
         {
-            return generateTransferResult(0, "Transferred no items");
+            contents.add(serializeItemStack(inv.getStack(i)));
         }
-        
-        if(turtle.getInventory().getStack(toSlot).isItemEqual(inv.getStack(from)))
-        {
-            turtle.getInventory().getStack(toSlot).increment(transferAmount);
-        }
-        else
-        {
-            turtle.getInventory().setStack(toSlot, fromStack.copy());
-            turtle.getInventory().getStack(toSlot).setCount(transferAmount);
-        }
-        inv.getStack(from).decrement(transferAmount);
-        
-        return generateTransferResult(transferAmount, "Transferred items");
+        return contents;
     }
     
     protected abstract BlockEntity getBlockEntity(InteractDirection direction);
