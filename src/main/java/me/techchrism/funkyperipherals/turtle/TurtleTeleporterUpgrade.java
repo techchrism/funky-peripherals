@@ -1,38 +1,43 @@
 package me.techchrism.funkyperipherals.turtle;
 
 import dan200.computercraft.api.client.TransformedModel;
+import dan200.computercraft.api.lua.LuaException;
+import dan200.computercraft.api.lua.LuaValues;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.AbstractTurtleUpgrade;
 import dan200.computercraft.api.turtle.ITurtleAccess;
 import dan200.computercraft.api.turtle.TurtleSide;
 import dan200.computercraft.api.turtle.TurtleUpgradeType;
 import dan200.computercraft.shared.turtle.core.InteractDirection;
-import me.techchrism.funkyperipherals.FunkyPeripherals;
-import me.techchrism.funkyperipherals.peripherals.StoragePeripheral;
+import me.techchrism.funkyperipherals.peripherals.TeleporterPeripheral;
 import org.jetbrains.annotations.NotNull;
+import party.lemons.simpleteleporters.block.entity.TeleporterBlockEntity;
+
+import java.util.Optional;
 
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.Registry;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
-public class TurtleStorageUpgrade extends AbstractTurtleUpgrade
+public class TurtleTeleporterUpgrade extends AbstractTurtleUpgrade
 {
-    @Environment (EnvType.CLIENT) private ModelIdentifier m_leftModel;
+    @Environment(EnvType.CLIENT) private ModelIdentifier m_leftModel;
     @Environment (EnvType.CLIENT) private ModelIdentifier m_rightModel;
     
-    public TurtleStorageUpgrade(Identifier id)
+    public TurtleTeleporterUpgrade(Identifier id)
     {
-        super(id, TurtleUpgradeType.PERIPHERAL, FunkyPeripherals.STORAGE_PERIPHERAL);
+        super(id, TurtleUpgradeType.PERIPHERAL, Registry.ITEM.get(new Identifier("simpleteleporters", "teleporter")));
     }
     
     @Override
     public IPeripheral createPeripheral(@NotNull ITurtleAccess turtle, @NotNull TurtleSide side)
     {
-        return new Peripheral(turtle);
+        return new TurtleTeleporterUpgrade.Peripheral(turtle);
     }
     
     @Environment (EnvType.CLIENT)
@@ -40,8 +45,8 @@ public class TurtleStorageUpgrade extends AbstractTurtleUpgrade
     {
         if(this.m_leftModel == null)
         {
-            this.m_leftModel = new ModelIdentifier("funkyperipherals:turtle_storage_upgrade_left", "inventory");
-            this.m_rightModel = new ModelIdentifier("funkyperipherals:turtle_storage_upgrade_right", "inventory");
+            this.m_leftModel = new ModelIdentifier("funkyperipherals:turtle_teleporter_upgrade_left", "inventory");
+            this.m_rightModel = new ModelIdentifier("funkyperipherals:turtle_teleporter_upgrade_right", "inventory");
         }
     }
     
@@ -59,7 +64,7 @@ public class TurtleStorageUpgrade extends AbstractTurtleUpgrade
     
     }
     
-    private static class Peripheral extends StoragePeripheral
+    private static class Peripheral extends TeleporterPeripheral
     {
         private final ITurtleAccess turtle;
     
@@ -69,10 +74,16 @@ public class TurtleStorageUpgrade extends AbstractTurtleUpgrade
         }
     
         @Override
-        protected BlockEntity getBlockEntity(InteractDirection direction)
+        protected TeleporterBlockEntity getTeleporter(Optional<String> direction, int index) throws LuaException
         {
-            BlockPos pos = turtle.getPosition().offset(direction.toWorldDir(turtle));
-            return turtle.getWorld().getBlockEntity(pos);
+            InteractDirection dir = LuaValues.checkEnum(2, InteractDirection.class, direction.orElse("FORWARD"));
+            BlockPos pos = turtle.getPosition().offset(dir.toWorldDir(turtle));
+            BlockEntity entity = turtle.getWorld().getBlockEntity(pos);
+            if(!(entity instanceof TeleporterBlockEntity))
+            {
+                throw new LuaException("Not targeting an teleporter block!");
+            }
+            return (TeleporterBlockEntity) entity;
         }
     
         @Override

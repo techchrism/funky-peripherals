@@ -23,6 +23,7 @@ dependencies {
 	// You may need to force-disable transitiveness on them.
 	modImplementation 'com.github.techchrism:cc-tweaked-fabric:v1.19.2'
 	modImplementation 'TechReborn:TechReborn-1.16:+'
+	modImplementation 'com.github.Lemonszz:SimpleTeleporters-Fabric:v2.2.0-1.15'
 }
 
 repositories {
