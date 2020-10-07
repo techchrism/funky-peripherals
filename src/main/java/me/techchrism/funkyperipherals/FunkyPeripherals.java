@@ -11,7 +11,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 
 public class FunkyPeripherals implements ModInitializer
@@ -21,7 +20,7 @@ public class FunkyPeripherals implements ModInitializer
     @Override
     public void onInitialize()
     {
-        boolean teleportersExist = FabricLoader.getInstance().isModLoaded("simpleteleporters");
+        final boolean teleportersExist = FabricLoader.getInstance().isModLoaded("simpleteleporters");
         
         Registry.register(Registry.ITEM, new Identifier("funkyperipherals", "storage_peripheral"), STORAGE_PERIPHERAL);
         ComputerCraftAPI.registerTurtleUpgrade(new TurtleStorageUpgrade(new Identifier("funkyperipherals", "storage_upgrade")));
@@ -29,17 +28,5 @@ public class FunkyPeripherals implements ModInitializer
         {
             ComputerCraftAPI.registerTurtleUpgrade(new TurtleTeleporterUpgrade(new Identifier("funkyperipherals", "teleporter_upgrade")));
         }
-        
-        boolean finalTeleportersExist = teleportersExist;
-        ModelLoadingRegistry.INSTANCE.registerAppender((resourceManager, consumer) ->
-        {
-            consumer.accept(new ModelIdentifier(new Identifier("funkyperipherals", "turtle_storage_upgrade_left"), "inventory"));
-            consumer.accept(new ModelIdentifier(new Identifier("funkyperipherals", "turtle_storage_upgrade_right"), "inventory"));
-            if(finalTeleportersExist)
-            {
-                consumer.accept(new ModelIdentifier(new Identifier("funkyperipherals", "turtle_teleporter_upgrade_left"), "inventory"));
-                consumer.accept(new ModelIdentifier(new Identifier("funkyperipherals", "turtle_teleporter_upgrade_right"), "inventory"));
-            }
-        });
     }
 }

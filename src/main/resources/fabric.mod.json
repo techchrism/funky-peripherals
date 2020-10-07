@@ -17,6 +17,9 @@
   "entrypoints": {
     "main": [
       "me.techchrism.funkyperipherals.FunkyPeripherals"
+    ],
+    "client": [
+      "me.techchrism.funkyperipherals.client.FunkyPeripheralsClient"
     ]
   },
   "mixins": [
