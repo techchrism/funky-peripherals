@@ -14,9 +14,13 @@ import techreborn.blockentity.storage.item.StorageUnitBaseBlockEntity;
 
 import java.util.*;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.InventoryProvider;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 
 public abstract class StoragePeripheral implements IPeripheral
@@ -33,12 +37,34 @@ public abstract class StoragePeripheral implements IPeripheral
         return other != null && this.getType().equals(other.getType());
     }
     
+    protected Inventory getInventory(Optional<String> direction, int index) throws LuaException
+    {
+        InteractDirection dir = LuaValues.checkEnum(2, InteractDirection.class, direction.orElse("FORWARD"));
+        BlockEntity entity = getBlockEntity(dir);
+        if(!(entity instanceof Inventory))
+        {
+            Block block = getBlock(dir);
+            if(!(block instanceof InventoryProvider))
+            {
+                throw new LuaException("Not targeting an inventory!");
+            }
+            InventoryProvider provider = (InventoryProvider) block;
+            BlockPos pos = getTurtle().getPosition().offset(dir.toWorldDir(getTurtle()));
+            return provider.getInventory(getBlockState(dir), getTurtle().getWorld(), pos);
+        }
+        return (Inventory) entity;
+    }
+    
     @LuaFunction(mainThread = true)
     public final boolean isStorage(ILuaContext context, Optional<String> direction) throws LuaException
     {
-        InteractDirection dir = LuaValues.checkEnum(1, InteractDirection.class, direction.orElse("FORWARD"));
-        BlockEntity entity = getBlockEntity(dir);
-        return entity instanceof Inventory;
+        try
+        {
+            getInventory(direction, 1);
+            return true;
+        }
+        catch(Exception ignored) {}
+        return false;
     }
     
     @LuaFunction(mainThread = true)
@@ -127,17 +153,6 @@ public abstract class StoragePeripheral implements IPeripheral
         return serializeItemStack(inv.getStack(slot));
     }
     
-    protected Inventory getInventory(Optional<String> direction, int index) throws LuaException
-    {
-        InteractDirection dir = LuaValues.checkEnum(2, InteractDirection.class, direction.orElse("FORWARD"));
-        BlockEntity entity = getBlockEntity(dir);
-        if(!(entity instanceof Inventory))
-        {
-            throw new LuaException("Not targeting an inventory!");
-        }
-        return (Inventory) entity;
-    }
-    
     private Object[] generateTransferResult(int count, String message)
     {
         return new Object[]{count, message};
@@ -178,6 +193,10 @@ public abstract class StoragePeripheral implements IPeripheral
     }
     
     protected abstract BlockEntity getBlockEntity(InteractDirection direction);
+    
+    protected abstract Block getBlock(InteractDirection direction);
+    
+    protected abstract BlockState getBlockState(InteractDirection direction);
     
     protected abstract ITurtleAccess getTurtle();
 }

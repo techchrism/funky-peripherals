@@ -11,6 +11,8 @@ import me.techchrism.funkyperipherals.FunkyPeripherals;
 import me.techchrism.funkyperipherals.peripherals.StoragePeripheral;
 import org.jetbrains.annotations.NotNull;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.util.Identifier;
@@ -73,6 +75,20 @@ public class TurtleStorageUpgrade extends AbstractTurtleUpgrade
         {
             BlockPos pos = turtle.getPosition().offset(direction.toWorldDir(turtle));
             return turtle.getWorld().getBlockEntity(pos);
+        }
+    
+        @Override
+        protected BlockState getBlockState(InteractDirection direction)
+        {
+            BlockPos pos = turtle.getPosition().offset(direction.toWorldDir(turtle));
+            return turtle.getWorld().getBlockState(pos);
+        }
+    
+        @Override
+        protected Block getBlock(InteractDirection direction)
+        {
+            BlockPos pos = turtle.getPosition().offset(direction.toWorldDir(turtle));
+            return turtle.getWorld().getBlockState(pos).getBlock();
         }
     
         @Override
