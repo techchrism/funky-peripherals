@@ -19,6 +19,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.math.BlockPos;
 
+import static party.lemons.simpleteleporters.block.TeleporterBlock.ON;
+
 public abstract class TeleporterPeripheral implements IPeripheral
 {
     @Override
@@ -81,6 +83,7 @@ public abstract class TeleporterPeripheral implements IPeripheral
         {
             turtle.getInventory().setStack(turtle.getSelectedSlot(), tele.getCrystal().copy());
             tele.setCrystal(ItemStack.EMPTY);
+            turtle.getWorld().setBlockState(tele.getPos(), turtle.getWorld().getBlockState(tele.getPos()).with(ON, false));
             return true;
         }
         return false;
@@ -105,6 +108,7 @@ public abstract class TeleporterPeripheral implements IPeripheral
         {
             tele.setCrystal(turtle.getInventory().getStack(turtle.getSelectedSlot()).copy());
             turtle.getInventory().setStack(turtle.getSelectedSlot(), ItemStack.EMPTY);
+            turtle.getWorld().setBlockState(tele.getPos(), turtle.getWorld().getBlockState(tele.getPos()).with(ON, true));
         }
         return true;
     }
